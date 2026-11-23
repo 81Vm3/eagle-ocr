@@ -1,0 +1,18 @@
+# eagle-ocr 配置样例（TOML，顶层平铺键；未知键会报错）。所有键都可省略，下面是默认值。
+# 命令行 --host / --port 优先于这里。
+
+host = "127.0.0.1"          # 默认只监听本机；对外暴露前先想清楚（接口没有鉴权）
+port = 8866
+device = "cpu"              # cpu | gpu | gpu:N（gpu 需要装 paddlepaddle-gpu，见 README）
+lang = "ch"                 # PaddleOCR 语言：ch（中英混合）、en、japan、korean ...
+enable_mkldnn = false       # paddlepaddle 3.3 CPU 下开启会推理报错，保持 false
+
+max_images_per_request = 20
+max_image_bytes = 20971520  # 20MB，单张（下载或 base64 解码后）
+download_timeout_seconds = 15
+download_concurrency = 4    # 整个进程的下载并发上限
+allowed_hosts = []          # 空 = 不限制；例：["*.xhscdn.com", "ci.xiaohongshu.com"]
+
+# 请求没带 timeout_seconds 时的整体时限，以及请求可设的上限
+default_request_timeout_seconds = 60
+max_request_timeout_seconds = 600
