@@ -24,6 +24,8 @@ class Config:
     lang: str = "ch"
     # CPU 推理是否开 oneDNN（MKLDNN）。paddlepaddle 3.3 下开启会让 PP-OCRv6 推理报错，默认关。
     enable_mkldnn: bool = False
+    # device=gpu 时加载前要求的最小空闲显存（MiB），不够就加载失败（不回退 CPU）。0 = 不检查。
+    gpu_min_free_mb: int = 2048
     max_images_per_request: int = 20
     max_image_bytes: int = 20 * 1024 * 1024
     download_timeout_seconds: float = 15.0
@@ -40,6 +42,7 @@ class Config:
                "device 只能是 cpu、gpu 或 gpu:N")
         _check(isinstance(self.lang, str) and self.lang != "", "lang 必须是非空字符串")
         _check(isinstance(self.enable_mkldnn, bool), "enable_mkldnn 必须是 true / false")
+        _check(_is_int(self.gpu_min_free_mb) and self.gpu_min_free_mb >= 0, "gpu_min_free_mb 必须是非负整数")
         for name in ("max_images_per_request", "max_image_bytes", "download_concurrency"):
             value = getattr(self, name)
             _check(_is_int(value) and value > 0, f"{name} 必须是正整数")

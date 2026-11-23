@@ -53,7 +53,8 @@ def _serve(args: argparse.Namespace) -> int:
     from .service import OcrService
 
     service = OcrService(config, PaddleEngine(lang=config.lang, device=config.device,
-                                                enable_mkldnn=config.enable_mkldnn))
+                                                enable_mkldnn=config.enable_mkldnn,
+                                                gpu_min_free_mb=config.gpu_min_free_mb))
     try:
         server = make_server(service, config.host, config.port)
     except OSError as exc:

@@ -6,6 +6,9 @@ port = 8866
 device = "cpu"              # cpu | gpu | gpu:N（gpu 需要装 paddlepaddle-gpu，见 README）
 lang = "ch"                 # PaddleOCR 语言：ch（中英混合）、en、japan、korean ...
 enable_mkldnn = false       # paddlepaddle 3.3 CPU 下开启会推理报错，保持 false
+# device = gpu / gpu:N 时，加载前要求该卡至少有这么多空闲显存（MiB），不够就加载失败（/health 带 load_error），
+# 不会回退 CPU。实测常驻约 0.3GB、处理 1080×2400 长图后约 2.1GB。0 = 不检查。
+gpu_min_free_mb = 2048
 
 max_images_per_request = 20
 max_image_bytes = 20971520  # 20MB，单张（下载或 base64 解码后）
