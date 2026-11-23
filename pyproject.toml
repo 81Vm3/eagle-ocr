@@ -8,11 +8,27 @@ requires-python = ">=3.11"
 dependencies = ["pillow>=10"]
 
 [project.optional-dependencies]
-# CPU 推理引擎。GPU 版不要装这个 extra，见 README「GPU」一节。
+# 推理引擎二选一：cpu 或 gpu，不要同时装（两个 wheel 都提供 paddle 模块，会互相覆盖）。
 cpu = ["paddleocr>=3.7,<3.8", "paddlepaddle>=3.3,<3.4"]
+# NVIDIA GPU（CUDA 12.6 构建，自带 CUDA/cuDNN 运行库 wheel，只需要宿主机驱动）。
+# paddlepaddle-gpu 不在 PyPI，靠下面的 [tool.uv.sources] 从飞桨官方 cu126 源取。
+gpu = ["paddleocr>=3.7,<3.8", "paddlepaddle-gpu>=3.3,<3.4"]
 
 [project.scripts]
 eagle-ocr = "eagle_ocr.cli:main"
+
+[tool.uv]
+# 两个 extra 互斥，让 uv lock / uv sync 不尝试把它们解在一起。
+conflicts = [[{ extra = "cpu" }, { extra = "gpu" }]]
+
+[tool.uv.sources]
+paddlepaddle-gpu = { index = "paddle-cu126" }
+
+[[tool.uv.index]]
+# explicit = true：这个源只用来取 paddlepaddle-gpu，其余依赖照常走 PyPI。
+name = "paddle-cu126"
+url = "https://www.paddlepaddle.org.cn/packages/stable/cu126/"
+explicit = true
 
 [build-system]
 requires = ["hatchling"]
