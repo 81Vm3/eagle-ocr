@@ -19,10 +19,12 @@
 
 ## 开发与测试
 - 环境：`uv venv -p 3.12 .venv && uv pip install -p .venv/bin/python -e ".[cpu]"`
+- GPU 环境单独一个 venv（`.venv-gpu`，已 gitignore），`uv pip install -p .venv-gpu/bin/python -e ".[gpu]"`；`cpu`/`gpu` extra 互斥。
 - 测试：`.venv/bin/python -m unittest discover -s tests -v`。测试**不联网、不依赖 PaddleOCR**：用 `tests/helpers.py` 的 `FakeEngine` 和 127.0.0.1 本地图床。
 - 修 bug 先补能复现的测试。
 - 提交：conventional commit，中文正文；按功能原子拆分。
 
 ## 已知坑
 - paddlepaddle 3.3 CPU + oneDNN 推理 PP-OCRv6 报 `ConvertPirAttribute2RuntimeAttribute not support`，所以 `enable_mkldnn` 默认 false。
+- PaddleOCR 在 CPU 版 paddle 上收到 `device="gpu"` 不报错、静默按 CPU 跑。所以 `PaddleEngine.load()` 先跑 `check_gpu()`，GPU 不可用就让加载失败，**不许回退 CPU**。
 - 首次加载会从 HuggingFace 下载约 130MB 模型到 `~/.paddlex/official_models`。

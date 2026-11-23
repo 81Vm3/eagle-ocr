@@ -1,7 +1,8 @@
 # eagle-ocr systemd 用户服务样例。
 #
-# 安装：
-#   uv tool install --with "paddleocr>=3.7,<3.8" --with "paddlepaddle>=3.3,<3.4" /path/to/eagle-ocr
+# 安装（二选一；--python 3.12：paddlepaddle 3.3 没有 3.14 的 wheel）：
+#   CPU：uv tool install --python 3.12 "/path/to/eagle-ocr[cpu]"
+#   GPU：uv tool install --python 3.12 "/path/to/eagle-ocr[gpu]"，并在 config.toml 里写 device = "gpu"
 #   mkdir -p ~/.config/systemd/user ~/.config/eagle-ocr
 #   cp deploy/eagle-ocr.service ~/.config/systemd/user/
 #   cp deploy/config.example.toml ~/.config/eagle-ocr/config.toml   # 可选
@@ -23,9 +24,15 @@ Type=simple
 ExecStart=%h/.local/bin/eagle-ocr serve --config %h/.config/eagle-ocr/config.toml
 # 模型已缓存在 ~/.paddlex 时跳过启动时对模型源的联网检查。
 Environment=PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK=True
+# GPU：不需要额外环境变量。WSL2 下 libcuda.so.1 在 /usr/lib/wsl/lib，已在 ldconfig 缓存里，
+# 不设 LD_LIBRARY_PATH 也能用（已在不带任何环境变量的最小环境里实测）。若 /health 的 load_error
+# 提示 device_count=0 / 找不到 libcuda，再打开下一行：
+#Environment=LD_LIBRARY_PATH=/usr/lib/wsl/lib
+# 多卡时用 device = "gpu:N" 选卡；也可以用 CUDA_VISIBLE_DEVICES 限定可见的卡：
+#Environment=CUDA_VISIBLE_DEVICES=0
 Restart=on-failure
 RestartSec=5
-# 模型加载 + 推理比较吃内存；按机器调整或删掉。
+# 模型加载 + 推理比较吃内存（GPU 版进程常驻内存约 1.7GB，不含显存）；按机器调整或删掉。
 MemoryMax=4G
 NoNewPrivileges=yes
 
